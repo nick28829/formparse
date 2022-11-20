@@ -2,4 +2,4 @@
 Contributors
 ============
 
-* Nicklas Bocksberger <nicklas.bocksberger@gmail.com>
+* Nicklas Bocksberger <nicklas@bocksberger.com>

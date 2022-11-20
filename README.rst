@@ -1,27 +1,10 @@
-.. These are examples of badges you might want to add to your README:
-   please update the URLs accordingly
-
-    .. image:: https://api.cirrus-ci.com/github/<USER>/formparse.svg?branch=main
-        :alt: Built Status
-        :target: https://cirrus-ci.com/github/<USER>/formparse
-    .. image:: https://readthedocs.org/projects/formparse/badge/?version=latest
+.. image:: https://readthedocs.org/projects/formparse/badge/?version=latest
         :alt: ReadTheDocs
         :target: https://formparse.readthedocs.io/en/stable/
-    .. image:: https://img.shields.io/coveralls/github/<USER>/formparse/main.svg
-        :alt: Coveralls
-        :target: https://coveralls.io/r/<USER>/formparse
-    .. image:: https://img.shields.io/pypi/v/formparse.svg
+
+.. image:: https://img.shields.io/pypi/v/formparse.svg
         :alt: PyPI-Server
         :target: https://pypi.org/project/formparse/
-    .. image:: https://img.shields.io/conda/vn/conda-forge/formparse.svg
-        :alt: Conda-Forge
-        :target: https://anaconda.org/conda-forge/formparse
-    .. image:: https://pepy.tech/badge/formparse/month
-        :alt: Monthly Downloads
-        :target: https://pepy.tech/project/formparse
-    .. image:: https://img.shields.io/twitter/url/http/shields.io.svg?style=social&label=Twitter
-        :alt: Twitter
-        :target: https://twitter.com/formparse
 
 .. image:: https://img.shields.io/badge/-PyScaffold-005CA0?logo=pyscaffold
     :alt: Project generated with PyScaffold
@@ -34,10 +17,41 @@ formparse
 =========
 
 
-    Add a short description here!
+    Simple library for evaluating mathematical formulas.
 
 
-A longer description of your project goes here...
+Written as an safe alternative to Pythons ``eval()`` function the aim was to provide a lightweight library that could
+evaluate mathematical formulas provided by users in a safe way.
+
+.. _installation:
+
+Installation
+============
+You can install this package unsing pip:
+
+.. code-block:: bash
+
+    pip install formparse
+
+
+SECURITY WARNING!
+-----------------
+
+
+    This package is currently pre-stable and some security features are still missing.
+
+
+.. _usage:
+
+Usage
+=====
+.. code-block:: python
+
+    from formparse import Formula
+
+    formula = Formula('3*x**2')
+
+    result = formula.eval({'x': 2})
 
 
 .. _pyscaffold-notes:
