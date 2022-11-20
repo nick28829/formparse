@@ -1,6 +1,6 @@
 .. image:: https://readthedocs.org/projects/formparse/badge/?version=latest
         :alt: ReadTheDocs
-        :target: https://formparse.readthedocs.io/en/stable/
+        :target: https://formparse.readthedocs.io/en/latest/
 
 .. image:: https://img.shields.io/pypi/v/formparse.svg
         :alt: PyPI-Server
@@ -36,7 +36,7 @@ You can install this package unsing pip:
 
 SECURITY WARNING!
 -----------------
-
+.. note::
 
     This package is currently pre-stable and some security features are still missing.
 
