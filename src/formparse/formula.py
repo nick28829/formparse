@@ -3,7 +3,7 @@
 import ast
 import logging
 import operator
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 __author__ = 'Nicklas Bocksberger'
 __copyright__ = 'Nicklas Bocksberger'
@@ -55,6 +55,7 @@ class Formula:
         ast.USub: operator.neg,
     }
 
+    MAX_FORMULA_LENGTH = 255
 
     def __init__(self, formula: str) -> None:
         """
@@ -66,10 +67,70 @@ class Formula:
             FormulaSyntaxError: Raised if the formula is not valid.
         """
         self.formula = formula
+        self.node = self.parse_formula(self.formula)
+        
+        self._validate_formula()
+
+    def _validate_formula(self):
+        if self.MAX_FORMULA_LENGTH and len(self.formula) > self.MAX_FORMULA_LENGTH:
+            raise FormulaSyntaxError('Formula can be 255 characters maximum.')
+        valid, *problem = self.validate(self.node)
+        if not valid:
+            raise FormulaSyntaxError(problem)
+
+    @classmethod
+    def parse_formula(cls, formula: str) -> ast.AST:
+        """Parse a given formula into an `ast` node.
+
+        Args:
+            formula (str): Formula to parse.
+
+        Returns:
+            ast.AST: Parsed node.
+        """
         try:
-            self.node = ast.parse(formula, '<string>', mode='eval')
+            return ast.parse(formula, '<string>', mode='eval')
         except SyntaxError as exception:
             raise FormulaSyntaxError('Could not parse formula.') from exception
+
+    @classmethod
+    def validate(cls, node: ast.AST or str) -> Tuple[bool, str or None]:
+        """Check whether or not formula provided in `node` is valid.
+
+        `NOTE`: `Formula.validate()` does not check for length constraint
+        but just for general validity.
+        Args:
+            node (ast.AST | str): Formula to check, either as `str` or parsed `ast` Tree.
+
+        Returns:
+            Tuple[bool, str | None]: If the formula is valid, if not,
+            provide reason in second value.
+        """
+        if isinstance(node, str):
+            try:
+                node = cls.parse_formula(node)
+            except FormulaSyntaxError as exception:
+                return False, str(exception)
+        # TODO: change to case match in version 1, change or to union operator
+        if isinstance(node, ast.Expression):
+            if type(node) in cls.EVALUATORS:
+                return cls.validate(node.body)
+            return False, 'Unknown function.'
+        elif isinstance(node, ast.Constant):
+            if isinstance(node.value, int) or isinstance(node.value, float):
+                return True, None
+            return False, f'Unsopported constant type {type(node.value)}'
+        elif isinstance(node, ast.Name):
+            return True, None
+        elif isinstance(node, ast.BinOp):
+            if type(node.op) in cls.BIN_OPERATORS:
+                return cls.validate(node.left) and cls.validate(node.right)
+            return False, f'Unsopported operator {node.op}'
+        elif isinstance(node, ast.UnaryOp):
+            if type(node.op) in cls.UN_OPERATORS:
+                return cls.validate(node.operand)
+            return False, f'Unsopported operator {node.op}'
+        return False, f'Unsopported Function {node}'
 
     def eval(self, args: Optional[dict]={}) -> float:
         """Evaluate the formula for a set if given arguments
