@@ -54,6 +54,21 @@ Usage
     result = formula.eval({'x': 2})
 
 
+.. _alternatives:
+
+Alternatives
+============
+
+``numexpr``:
+------------
+
+``numexpr`` is a Python library for ``numpy`` that accelerates array operations
+but it can hadnle simple string calculations as well. It is therefore a lot bigger than
+``formparse`` but if you are using ``numpy`` anyways in you project or need additional
+features that we do not provide this might be a good fit. Check out its repo 
+`here <https://github.com/pydata/numexpr>`_ .
+
+
 .. _pyscaffold-notes:
 
 Note
