@@ -56,6 +56,8 @@ class Formula:
     }
 
     MAX_FORMULA_LENGTH = 255
+    """Maximal length accepted for the formula, as is (incl. whitespaces, etc.)
+    """
 
     def __init__(self, formula: str) -> None:
         """
@@ -68,7 +70,6 @@ class Formula:
         """
         self.formula = formula
         self.node = self.parse_formula(self.formula)
-        
         self._validate_formula()
 
     def _validate_formula(self):

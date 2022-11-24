@@ -37,6 +37,27 @@ it a dictionary with the variables you want to provide the formula with.
     result = formula.eval({'x': 2})
 
 
+.. _validation:
+
+Validation:
+===========
+When calling the contructor, a validator is automatically called. It ensures
+that the formula is parseable, is not longer than the length constraint and
+all the operators are supported. If there is an error, a ``FormulaSyntaxError``
+is raised. You can manually validate a formula using the ``.validate()`` class
+method. 
+
+.. code-block:: python
+
+
+    valid, problem = Formula.validate('a^2')
+    if not valid:
+        print(problem) # outputs 'Unsopported operator'
+
+
+The function returns if the formula is valid and, if it is not, the reason why
+it is invalid.
+
 .. _limitations:
 
 Limitations
