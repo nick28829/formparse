@@ -126,12 +126,6 @@ class TestFormula(unittest.TestCase):
         formula = Formula('x + y')
         self.assertRaises(FormulaRuntimeError, lambda: formula.eval({'x': 5, 'z': 6}))
 
-    def test_fails_for_invalid_formula(self):
-        """Test fails for invalid formula with not supported operator.
-        """
-        self.assertRaises(FormulaSyntaxError, lambda: Formula('x//5').eval({'x': 2}))
-        # self.assertRaises(FormulaSyntaxError, lambda: Formula('x**5').eval({'x': 2}))
-
     def test_fails_for_invalid_args(self):
         """Test fails for invalid argument type.
         """
@@ -165,6 +159,50 @@ class TestFormula(unittest.TestCase):
         formula = Formula('2.5/x')
         result = formula.eval({'x': 1.25})
         self.assertEqual(result, 2)
+
+
+class TestFormulaValidation(unittest.TestCase):
+
+    def test_validate_works_for_string(self):
+        """Test validation works with `Formula.validate()` and a `str` argument.
+        """
+        valid, _ = Formula.validate('3*(a+7)')
+        self.assertTrue(valid)
+        valid, _ = Formula.validate('3)')
+        self.assertFalse(valid)
+
+    def test_validate_works_for_node(self):
+        """Test validation works with `Formula.validate()` and a `ast.AST` argument.
+        """
+        import ast
+        valid, _ = Formula.validate(ast.parse('4*5', '<string>', mode='eval'))
+        self.assertTrue(valid)
+        valid, _ = Formula.validate(ast.parse('3//7', '<string>', mode='eval'))
+        self.assertFalse(valid)
+
+    def test_fails_for_invalid_operator(self):
+        """Test fails for creating formula with invalid operator.
+        """
+        self.assertRaises(FormulaSyntaxError, lambda: Formula('a // 5'))
+
+    def test_succeeds_for_valid_formula(self):
+        """Test succeeds for valid formula.
+        """
+        Formula('5*(4/7)**6*x')
+        self.assertTrue(True)
+
+    def test_fails_for_length_constraint(self):
+        """Test fails for string longer than 255 characters.
+        """
+        f = '2' + 100 * '+ 2'
+        self.assertRaises(FormulaSyntaxError, lambda: Formula(f))
+
+    def test_succeeds_for_validate_long_formula(self):
+        """Test succeeds with `validate()` method since it does not check length constraint.
+        """
+        f = '2' + 100 * '+ 2'
+        Formula.validate(f)
+        self.assertTrue(True)
 
 
 if __name__=='__main__':
