@@ -58,6 +58,22 @@ method.
 The function returns if the formula is valid and, if it is not, the reason why
 it is invalid.
 
+.. _complexity_check:
+
+Complexity Check:
+=================
+Before acutally evaluating a formula with the ``eval()`` method, a complexity check
+is run automatically. This is intended to prevent user from crashing the program
+complex calculations. The check is based on the power of tens of the operands. If
+the maximum possible result is bigger than 10^18, a ``FormulaComplexityError``
+is thrown. For examle:
+
+.. code-block:: python
+
+
+    Formula('65**500').eval() # throws `FormulaComplexityError` error
+
+
 .. _limitations:
 
 Limitations

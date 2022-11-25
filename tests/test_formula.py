@@ -2,6 +2,7 @@ import unittest
 
 from formparse import Formula
 from formparse.formula import (
+    FormulaComplexityError,
     FormulaRuntimeError,
     FormulaSyntaxError,
     FormulaZeroDivisionError,
@@ -162,6 +163,8 @@ class TestFormula(unittest.TestCase):
 
 
 class TestFormulaValidation(unittest.TestCase):
+    """Test for `Formula` validation methods.
+    """
 
     def test_validate_works_for_string(self):
         """Test validation works with `Formula.validate()` and a `str` argument.
@@ -203,6 +206,57 @@ class TestFormulaValidation(unittest.TestCase):
         f = '2' + 100 * '+ 2'
         Formula.validate(f)
         self.assertTrue(True)
+
+class TestFormulaOperationEstimation(unittest.TestCase):
+    """Test for `Formula`operation size estimation.
+    """
+
+    def test_fails_for_complex_calculation(self):
+        """Test fails for complex calculation.
+        """
+        formula = Formula('99**9999**9999')
+        self.assertRaises(FormulaComplexityError, formula.eval)
+
+    def test_estimate_addition_size(self):
+        """Estimation is correct for simple addition.
+        """
+        formula = Formula('99+9999')
+        result = formula.eval()
+        size_estimation = Formula.estimate_result_size(formula.node)
+        self.assertEqual(len(str(int(result))), size_estimation)
+
+    def test_estimate_subtraction_size(self):
+        """Estimation is correct for simple subtraction.
+        """
+        formula = Formula('-99-9999')
+        result = formula.eval()
+        size_estimation = Formula.estimate_result_size(formula.node)
+        # subtract 1 for negative sign
+        self.assertEqual(len(str(int(result))) - 1, size_estimation)
+
+    def test_estimate_multiplicationn_size(self):
+        """Estimation is correct for simple multiplication.
+        """
+        formula = Formula('99*9999')
+        result = formula.eval()
+        size_estimation = Formula.estimate_result_size(formula.node)
+        self.assertEqual(len(str(int(result))), size_estimation)
+
+    def test_estimate_division_size(self):
+        """Estimation is correct for simple division.
+        """
+        formula = Formula('1000/99')
+        result = formula.eval()
+        size_estimation = Formula.estimate_result_size(formula.node)
+        self.assertEqual(len(str(int(result))), size_estimation)
+
+    def test_estimate_power_size(self):
+        """Estimation is correct for simple power.
+        """
+        formula = Formula('99**9')
+        result = formula.eval()
+        size_estimation = Formula.estimate_result_size(formula.node)
+        self.assertEqual(len(str(int(result))), size_estimation)
 
 
 if __name__=='__main__':
