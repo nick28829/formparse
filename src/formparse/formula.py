@@ -30,6 +30,10 @@ class FormulaZeroDivisionError(FormulaRuntimeError):
     """Exception raised if there is a division throgh 0 error.
     """
 
+class FormulaComplexityError(FormulaRuntimeError):
+    """Exception raised if the expected result is to big to calculate.
+    """
+
 class Formula:
     """Simple formula, generated from a string input can it be evaluated with it
     `.eval()`method. The currently supported operators are `+`, `-`, `*` and `/`.
@@ -56,7 +60,11 @@ class Formula:
     }
 
     MAX_FORMULA_LENGTH = 255
-    """Maximal length accepted for the formula, as is (incl. whitespaces, etc.)
+    """Maximum length accepted for the formula, as is (incl. whitespaces, etc.)
+    """
+
+    MAX_RESULT_POTENCY = 18
+    """Maximum maximum power of ten that is allowed for a expected result.
     """
 
     def __init__(self, formula: str) -> None:
@@ -150,6 +158,10 @@ class Formula:
             raise FormulaRuntimeError(
                 f'Invalid type `{type(args)}` for args, only `dict` supported.')
         try:
+            self.validate_result_size(args)
+        except FormulaComplexityError as exception:
+            raise exception
+        try:
             return self._eval_node(self.formula, self.node, args)
         except FormulaSyntaxError:
             raise
@@ -203,3 +215,80 @@ class Formula:
 
     def __str__(self) -> str:
         return f'<formparse.Formula {self.formula[:32]}>'
+
+    def validate_result_size(self, args: Optional[dict]=None) -> None:
+        """Make sure that the maximum estimated result is not bigger
+        than as set by `MAX_RESULT_POTENCY`.
+
+        Args:
+            args (Optional[dict], optional): Parameters provided for
+            evaluation, if not provided, each variable is assigned
+            potency of 1. Defaults to None.
+
+        Raises:
+            FormulaComplexityError: If the expected result is bigger than allowed.
+        """
+        result_potency = self.estimate_result_size(self.node, args)
+        if result_potency > self.MAX_RESULT_POTENCY:
+            raise FormulaComplexityError(
+                f'Expected result with maximum size 10^{result_potency} is too big.')
+
+    @classmethod
+    def estimate_result_size(cls, node, args: Optional[dict]=None) -> int:
+        """Estimate the result size based one the power of tens of its operands.
+
+        A more indepth explanation will follow.
+
+        Args:
+            node (ast.AST): Node to estimate result size for.
+            args (Optional[dict], optional): Parameters provided for
+            evaluation, if not provided, each variable is assigned
+            potency of 1. Defaults to None.
+
+        Raises:
+            FormulaComplexityError: If calculating the result size itself
+            is to expensive.
+
+        Returns:
+            int: The maximum power to ten of the result.
+        """
+        def potency(x: float):
+            return len(str(int(x))) - 1 # might not be elegant but it's simple
+
+        if isinstance(node, ast.Expression):
+            return cls.estimate_result_size(node.body, args)
+        if isinstance(node, ast.Constant):
+            return potency(node.value)
+        if isinstance(node, ast.Name):
+            if args and node.id in args:
+                return potency(args[node.id])
+            _logger.warning('Calculating complexity of Formula with unknown %s.', node.id)
+            return 1
+        if isinstance(node, ast.BinOp):
+            if isinstance(node.op, (ast.Add, ast.Sub)):
+                return max(cls.estimate_result_size(node.left, args),
+                           cls.estimate_result_size(node.right, args),
+                        ) + 2
+            if isinstance(node.op, ast.Mult):
+                return cls.estimate_result_size(node.left, args) \
+                        + cls.estimate_result_size(node.right, args) \
+                        + 2
+            if isinstance(node.op, ast.Div):
+                pot_l = cls.estimate_result_size(node.left, args)
+                pot_r = cls.estimate_result_size(node.right, args)
+                return int((( pot_l + 1) / (pot_r + 1 )) + 0.5)
+            if isinstance(node.op, ast.Pow):
+                pot_l = cls.estimate_result_size(node.left, args) # biggest potency possible on left
+                pot_r = cls.estimate_result_size(node.right, args) # "" on right
+                if pot_r > 5:
+                    raise FormulaComplexityError(
+                            'Can\'t calculate result size due to the partial result size')
+                if pot_r > 3:
+                    a = cls.estimate_result_size(cls.parse_formula(f'10**({pot_r} + 1) - 1'))
+                    if a < cls.MAX_RESULT_POTENCY:
+                        raise FormulaComplexityError(
+                            'Can\'t calculate result size due to the partial result size')
+                max_val_r = 10 ** (pot_r + 1) - 1 # biggest value possible on right site
+                return (pot_l + 1) * max_val_r
+        if isinstance(node, ast.UnaryOp):
+            return cls.estimate_result_size(node.operand)
