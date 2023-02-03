@@ -67,12 +67,3 @@ but it can hadnle simple string calculations as well. It is therefore a lot bigg
 ``formparse`` but if you are using ``numpy`` anyways in you project or need additional
 features that we do not provide this might be a good fit. Check out its repo 
 `here <https://github.com/pydata/numexpr>`_ .
-
-
-.. _pyscaffold-notes:
-
-Note
-====
-
-This project has been set up using PyScaffold 4.3.1. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
