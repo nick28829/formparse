@@ -22,6 +22,9 @@ Since the package uses ``ast`` for building the syntax tree the syntax and
 operators are those used in Python. Concretely, the currently available
 operators are ``+``, ``-``, ``*``, ``/`` and ``**``.
 
+Additionally, there the functions ``min()``, ``max()`` and ``abs()`` are available.
+They can be used the same way as in Python.
+
 
 .. _evaluating_a_formula:
 

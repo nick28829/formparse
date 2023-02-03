@@ -288,5 +288,61 @@ class TestFormulaOperationEstimation(unittest.TestCase):
         self.assertEqual(len(str(int(result))), size_estimation)
 
 
+class TestFormulaFunctions(unittest.TestCase):
+    """Test for functions that can be used inside `Formula`.
+    """
+
+    def test_max_function(self):
+        """Test `max` function for correctness.
+        """
+        formula = Formula('max(1, x)')
+        result = formula.eval({'x': 2})
+        self.assertEqual(result, 2)
+        result = formula.eval({'x': 0})
+        self.assertEqual(result, 1)
+
+    def test_min_function(self):
+        """Test `min` function for correctness.
+        """
+        formula = Formula('min(1, x)')
+        result = formula.eval({'x': 2})
+        self.assertEqual(result, 1)
+        result = formula.eval({'x': 0})
+        self.assertEqual(result, 0)
+
+    def test_abs_function(self):
+        """Test `abs` function for correctness.
+        """
+        formula = Formula('abs(x)')
+        result = formula.eval({'x': -5})
+        self.assertEqual(result, 5)
+        result = formula.eval({'x': 5})
+        self.assertEqual(result, 5)
+
+    def test_fail_abs_without_args(self):
+        """Test fails for `abs` without arguments.
+        """
+        formula = Formula('abs()')
+        self.assertRaises(FormulaRuntimeError, formula.eval)
+
+    def test_fail_min_without_args(self):
+        """Test fails for `min` without arguments.
+        """
+        formula = Formula('min()')
+        self.assertRaises(FormulaRuntimeError, formula.eval)
+
+    def test_fail_max_without_args(self):
+        """Test fails for `max` without arguments.
+        """
+        formula = Formula('max()')
+        self.assertRaises(FormulaRuntimeError, formula.eval)
+
+    def test_fail_abs_with_multiple_args(self):
+        """Test fails for `abs` with multiple arguments.
+        """
+        formula = Formula('abs(1, 2)')
+        self.assertRaises(FormulaRuntimeError, formula.eval)
+
+
 if __name__=='__main__':
     unittest.main()

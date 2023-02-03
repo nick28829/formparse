@@ -45,6 +45,7 @@ class Formula:
         ast.Name: '_eval_name',
         ast.BinOp: '_eval_binop',
         ast.UnaryOp: '_eval_unaryop',
+        ast.Call: '_eval_call',
     }
 
     BIN_OPERATORS = {
@@ -57,6 +58,12 @@ class Formula:
 
     UN_OPERATORS = {
         ast.USub: operator.neg,
+    }
+
+    FUNCTIONS = {
+        'max': max,
+        'abs': abs,
+        'min': min,
     }
 
     MAX_FORMULA_LENGTH = 255
@@ -139,6 +146,10 @@ class Formula:
             if type(node.op) in cls.UN_OPERATORS:
                 return cls.validate(node.operand)
             return False, f'Unsopported operator {node.op}'
+        elif isinstance(node, ast.Call):
+            if node.func.id in cls.FUNCTIONS:
+                return all(cls.validate(arg) for arg in node.args), None
+            return False, f'Unsupported function {node.func.id}'
         return False, f'Unsopported Function {node}'
 
     def eval(self, args: Optional[dict]=None) -> float:
@@ -169,6 +180,13 @@ class Formula:
             raise FormulaZeroDivisionError from ZeroDivisionError
         except Exception as exception:
             raise FormulaRuntimeError(f'Evaluation failed: {exception}') from exception
+
+    def _eval_call(self, source: str, node: ast.AST, args: Dict[str, Any]) -> float:
+        try:
+            func = self.FUNCTIONS[node.func.id]
+        except KeyError as exception:
+            raise FormulaSyntaxError(f'Function {node.func.id} not supported') from exception
+        return func(*[self._eval_node(source, arg, args) for arg in node.args])
 
     def _eval_node(self, source: str, node: ast.AST, args: Dict[str, Any]) -> float:
         try:
@@ -294,3 +312,12 @@ class Formula:
                 return (pot_l + 1) * max_val_r
         if isinstance(node, ast.UnaryOp):
             return cls.estimate_result_size(node.operand)
+        if isinstance(node, ast.Call):
+            try:
+                return max(cls.estimate_result_size(arg) for arg in node.args)
+            except ValueError:
+                _logger.warning(
+                    'Calculating complexity of Formula with function %s with unknown result size.',
+                    node.func.id,
+                )
+                return 1
