@@ -171,11 +171,13 @@ class Formula:
             raise FormulaRuntimeError(f'Evaluation failed: {exception}') from exception
 
     def _eval_node(self, source: str, node: ast.AST, args: Dict[str, Any]) -> float:
-        for ast_type, eval_name in self.EVALUATORS.items():
-            if isinstance(node, ast_type):
-                evaluator = getattr(self, eval_name)
-                return evaluator(source, node, args)
-        raise FormulaSyntaxError('Could not evaluate, might be due to unsupported operator.')
+        try:
+            eval_name = self.EVALUATORS[type(node)]
+        except KeyError as exception:
+            raise FormulaSyntaxError(
+                'Could not evaluate, might be due to unsupported operator.') from exception
+        evaluator = getattr(self, eval_name)
+        return evaluator(source, node, args)
 
     def _eval_expression(self, source: str, node: ast.Expression, args: Dict[str, Any]) -> float:
         return self._eval_node(source, node.body, args)
