@@ -106,7 +106,7 @@ class TestFormula(unittest.TestCase):
         """Test aborting the evaluation if the results might become too big.
         """
 
-    def test_faisl_for_division_by_zero(self):
+    def test_fails_for_division_by_zero(self):
         """Test failing for division by zero.
         """
         formula = Formula('3/x')
@@ -161,6 +161,34 @@ class TestFormula(unittest.TestCase):
         result = formula.eval({'x': 1.25})
         self.assertEqual(result, 2)
 
+    def test_addition_with_constant_formula(self):
+        """Test simple addition with no extra argument.
+        """
+        formula = Formula('2 + 2')
+        result = formula.eval()
+        self.assertEqual(result, 4)
+
+    def test_subtraction_with_constant_formula(self):
+        """Test simple subtraction with no extra argument.
+        """
+        formula = Formula('2 - 2')
+        result = formula.eval()
+        self.assertEqual(result, 0)
+
+    def test_multiplication_with_constant_formula(self):
+        """Test simple multiplication with no extra argument.
+        """
+        formula = Formula('2 * 2')
+        result = formula.eval()
+        self.assertEqual(result, 4)
+
+    def test_division_with_constant_formula(self):
+        """Test simple division with no extra argument.
+        """
+        formula = Formula('2 / 2')
+        result = formula.eval()
+        self.assertEqual(result, 1)
+
 
 class TestFormulaValidation(unittest.TestCase):
     """Test for `Formula` validation methods.
@@ -206,6 +234,7 @@ class TestFormulaValidation(unittest.TestCase):
         f = '2' + 100 * '+ 2'
         Formula.validate(f)
         self.assertTrue(True)
+
 
 class TestFormulaOperationEstimation(unittest.TestCase):
     """Test for `Formula`operation size estimation.
