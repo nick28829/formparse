@@ -141,7 +141,7 @@ class Formula:
             return False, f'Unsopported operator {node.op}'
         return False, f'Unsopported Function {node}'
 
-    def eval(self, args: Optional[dict]={}) -> float:
+    def eval(self, args: Optional[dict]=None) -> float:
         """Evaluate the formula for a set if given arguments
 
         Args:
@@ -154,7 +154,7 @@ class Formula:
         Returns:
             float: The value of the result.
         """
-        if not isinstance(args, dict):
+        if args and not isinstance(args, dict):
             raise FormulaRuntimeError(
                 f'Invalid type `{type(args)}` for args, only `dict` supported.')
         try:
