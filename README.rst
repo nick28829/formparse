@@ -54,10 +54,16 @@ Usage
     result = formula.eval({'x': 2})
 
 
-.. _pyscaffold-notes:
+.. _alternatives:
 
-Note
-====
+Alternatives
+============
 
-This project has been set up using PyScaffold 4.3.1. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
+``numexpr``:
+------------
+
+``numexpr`` is a Python library for ``numpy`` that accelerates array operations
+but it can hadnle simple string calculations as well. It is therefore a lot bigger than
+``formparse`` but if you are using ``numpy`` anyways in you project or need additional
+features that we do not provide this might be a good fit. Check out its repo 
+`here <https://github.com/pydata/numexpr>`_ .
